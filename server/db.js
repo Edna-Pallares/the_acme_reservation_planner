@@ -1,11 +1,12 @@
 const pg = require("pg");
 const client = new pg.Client(
-  process.env.DATABASE_URL || "postgres://localhost/the_acme_reservation_planner"
+  process.env.DATABASE_URL ||
+    "postgres://localhost/the_acme_reservation_planner"
 );
-const uuid = require('uuid');
+const uuid = require("uuid");
 
-const createTables = async()=> {
-    const SQL = `
+const createTables = async () => {
+  const SQL = `
     DROP TABLE IF EXISTS reservations;
     DROP TABLE IF EXISTS customers;
     DROP TABLE IF EXISTS restaurants;
@@ -26,69 +27,80 @@ const createTables = async()=> {
         restaurant_id UUID REFERENCES restaurants(id) NOT NULL
     );
     `;
-    await client.query(SQL);
+  await client.query(SQL);
 };
-const createCustomer = async(name)=> {
-    const SQL = `
+const createCustomer = async (name) => {
+  const SQL = `
     INSERT INTO customers(id, name) VALUES($1, $2) RETURNING *
     `;
-    const response = await client.query(SQL, [uuid.v4(), name]);
-    return response.rows[0];
+  const response = await client.query(SQL, [uuid.v4(), name]);
+  return response.rows[0];
 };
-const createRestaurant = async(name)=> {
-    const SQL = `
+const createRestaurant = async (name) => {
+  const SQL = `
     INSERT INTO restaurants(id, name) VALUES($1, $2) RETURNING *
     `;
-    const response = await client.query(SQL, [uuid.v4(), name]);
-    return response.rows[0];
+  const response = await client.query(SQL, [uuid.v4(), name]);
+  return response.rows[0];
 };
-const createReservation = async({ restaurant_id, customer_id, reservation_date, party_count})=>{
-    const SQL = `
+const createReservation = async ({
+  restaurant_id,
+  customer_id,
+  reservation_date,
+  party_count,
+}) => {
+  const SQL = `
     INSERT INTO reservations(id, restaurant_id, customer_id, reservation_date, party_count) VALUES($1, $2, $3, $4, $5) RETURNING *
     `;
-    const response = await client.query(SQL, [uuid.v4(), restaurant_id, customer_id, reservation_date, party_count]);
-    return response.rows[0];
+  const response = await client.query(SQL, [
+    uuid.v4(),
+    restaurant_id,
+    customer_id,
+    reservation_date,
+    party_count,
+  ]);
+  return response.rows[0];
 };
-const fetchCustomers = async()=> {
-    const SQL = `
+const fetchCustomers = async () => {
+  const SQL = `
     SELECT *
     FROM customers
     `;
-    const response = await client.query(SQL);
-    return response.rows;
+  const response = await client.query(SQL);
+  return response.rows;
 };
-const fetchRestaurants = async()=> {
-    const SQL = `
+const fetchRestaurants = async () => {
+  const SQL = `
         SELECT *
         FROM restaurants
     `;
-    const response = await client.query(SQL);
-    return response.rows;
+  const response = await client.query(SQL);
+  return response.rows;
 };
-const fetchReservations = async()=> {
-    const SQL = `
+const fetchReservations = async () => {
+  const SQL = `
     SELECT *
     FROM reservations
     `;
-    const response = await client.query(SQL);
-    return response.rows;
+  const response = await client.query(SQL);
+  return response.rows;
 };
-const destroyReservation = async(id)=> {
-    const SQL =`
+const destroyReservation = async (id) => {
+  const SQL = `
     DELETE FROM reservations 
     where id = $1
     `;
-    await client.query(SQL, [id]);
+  await client.query(SQL, [id]);
 };
 
 module.exports = {
-    client,
-    createTables,
-    createCustomer,
-    createRestaurant,
-    fetchCustomers,
-    fetchRestaurants,
-    createReservation,
-    fetchReservations,
-    destroyReservation
-  };
+  client,
+  createTables,
+  createCustomer,
+  createRestaurant,
+  fetchCustomers,
+  fetchRestaurants,
+  createReservation,
+  fetchReservations,
+  destroyReservation,
+};
