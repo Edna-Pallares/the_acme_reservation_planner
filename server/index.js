@@ -10,6 +10,56 @@ const {
     destroyReservation
 } = require('./db');
 
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.get('/api/customers', async(req, res, next)=> {
+    try {
+      res.send(await fetchCustomers());
+    }
+    catch(ex){
+      next(ex);
+    }
+  });
+  
+  app.get('/api/restaurants', async(req, res, next)=> {
+    try {
+      res.send(await fetchRestaurants());
+    }
+    catch(ex){
+      next(ex);
+    }
+  });
+  
+  app.get('/api/reservations', async(req, res, next)=> {
+    try {
+      res.send(await fetchReservations());
+    }
+    catch(ex){
+      next(ex);
+    }
+  });
+
+  app.delete('/api/reservations/:id', async(req, res, next)=> {
+    try {
+      await destroyReservation(req.params.id);
+      res.sendStatus(204);
+    }
+    catch(ex){
+      next(ex);
+    }
+  });
+
+  app.post('/api/reservations', async(req, res, next)=> {
+    try {
+      res.status(201).send(await createReservation(req.body));
+    }
+    catch(ex){
+      next(ex);
+    }
+  });
+
 const init = async()=> {
   await client.connect();
   console.log('connected to database');
@@ -35,6 +85,10 @@ const init = async()=> {
     createReservation({ user_id: lee.id, place_id: pancakes.id, reservation_date: '10/31/2024', party_count: 4}),
   ]);
   console.log(await fetchReservations());
+
+  const port = process.env.PORT || 3000;
+  app.listen(port, ()=> console.log('listening on port ${port}'));
+
 };
 
 init();
